@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaflet sample</title>
+
+    <link rel = "stylesheet" href = "http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
+
+    <script src = "http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+</head>
+
+<body>
+<div id = "map" style = "width: 900px; height: 580px"></div>
+<script>
+    // Tworzę opcje mapy
+    var mapOptions = {
+        center: [49.756940830873724, 18.626051340428333],
+        zoom: 18
+    }
+
+    // Tworzę obiekt mapy
+    var map = new L.map('map', mapOptions);
+
+
+    // Tworzę obiekt warstwy
+    var layer = new L.TileLayer('http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png');
+
+
+    var marker = new L.Marker([49.756940830873724, 18.626051340428333]);
+
+    marker.bindPopup('Akademia WSB Wydzial Zamiejscowy w Cieszynie').openPopup();
+
+    marker.addTo(map);
+
+    map.on("click", function(e){
+        new L.Marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+    })
+
+/*
+
+    //***Koło***
+
+    //Centrum koła
+    var circleCenter = [49.756940830873724, 18.626051340428333];
+
+    // Opcje koła
+    var circleOptions = {
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0
+    }
+
+    // Tworzę koło
+    var circle = L.circle(circleCenter, 100, circleOptions);
+
+    // Umieszczam koło na mapie
+    circle.addTo(map);
+
+
+*/
+
+    //***Wielokąt***
+
+    // Tworzę latlng object
+    var latlngs = [
+        [49.756940830873724, 18.626051340428333],
+        [49.75695562991441, 18.624835610389713],
+        [49.75643925543849, 18.624728322029117],
+        [49.75593673808542, 18.625087738037113],
+        [49.75616547076765, 18.625833392143253],
+        [49.756940830873724, 18.626051340428333],
+    ];
+
+    //Tworzę opcje wielokąta
+    var polygon = L.polygon(latlngs, {color: 'Blue', weight: 1})
+
+    // Umieszczam wielokąt na mapie
+    polygon.addTo(map);
+
+    // Dodaję warstwę do mapy
+    map.addLayer(layer);
+
+
+</script>
+</body>
+
+</html>
