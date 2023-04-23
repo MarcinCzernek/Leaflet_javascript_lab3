@@ -1,86 +1,101 @@
+<!-- Marcin Czernek nr.albumu 39924 - OpenAQ -->
+<!-- Języki skryptowe - OpenAQ -->
+<!-- Laboratorium - JavaScript 3 - OpenStreetMap, Leaflet i baza zanieczyszczenia powietrza - OpenAQ -->
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Leaflet sample</title>
-
+    <meta charset="UTF-8">
+    <title>Laboratory Leaflet and OpenAQ</title>
+    <meta http-equiv="refresh" content="s">
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://unpkg.com/leaflet-geosearch@3.0.0/dist/geosearch.umd.js"></script>
     <link rel = "stylesheet" href = "http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
-
     <script src = "http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    </script>
 </head>
-
 <body>
-<div id = "map" style = "width: 900px; height: 580px"></div>
+
+<input id="mySearchField" name="search" placeholder="Search.." type="text">
+
+<a href="javascript:location.reload()">
+    <button id="mySearchButton">Search</button>
+</a>
+<div id="myContentArea"></div>
+
 <script>
-    // Tworzę opcje mapy
-    var mapOptions = {
-        center: [49.756940830873724, 18.626051340428333],
-        zoom: 18
-    }
+    $(function() {
+        var _myContentArea = document.getElementById("myContentArea");
+        var _mySearchButton = document.getElementById("mySearchButton");
+        _mySearchButton.onclick = getData;
 
-    // Tworzę obiekt mapy
-    var map = new L.map('map', mapOptions);
+        function getData(){
+            var _mySearchField = document.getElementById("mySearchField");
+            $.ajax({
+                url: "https://api.openaq.org/v1/cities?city="+_mySearchField.value,
+                method: "GET",
+                dataType: "json",
+                success: function(data) {
+                    var str = "";
+                    var city;
+                    var air;
+                    for(var i= 0; i < data.results.length; i++){
 
+                        str +='City : '+data.results[i].city+' <br> Country : '+data.results[i].country+'<br>Count : '+data.results[i].count+'<br>';
+                        city = data.results[i].city;
+                        air = data.results[i].count;
 
-    // Tworzę obiekt warstwy
-    var layer = new L.TileLayer('http://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png');
-
-
-    var marker = new L.Marker([49.756940830873724, 18.626051340428333]);
-
-    marker.bindPopup('Akademia WSB Wydzial Zamiejscowy w Cieszynie').openPopup();
-
-    marker.addTo(map);
-
-    map.on("click", function(e){
-        new L.Marker([e.latlng.lat, e.latlng.lng]).addTo(map);
-    })
-
-/*
-
-    //***Koło***
-
-    //Centrum koła
-    var circleCenter = [49.756940830873724, 18.626051340428333];
-
-    // Opcje koła
-    var circleOptions = {
-        color: 'red',
-        fillColor: '#f03',
-        fillOpacity: 0
-    }
-
-    // Tworzę koło
-    var circle = L.circle(circleCenter, 100, circleOptions);
-
-    // Umieszczam koło na mapie
-    circle.addTo(map);
+                    }
+                    _myContentArea.innerHTML = str;
 
 
-*/
-
-    //***Wielokąt***
-
-    // Tworzę latlng object
-    var latlngs = [
-        [49.756940830873724, 18.626051340428333],
-        [49.75695562991441, 18.624835610389713],
-        [49.75643925543849, 18.624728322029117],
-        [49.75593673808542, 18.625087738037113],
-        [49.75616547076765, 18.625833392143253],
-        [49.756940830873724, 18.626051340428333],
-    ];
-
-    //Tworzę opcje wielokąta
-    var polygon = L.polygon(latlngs, {color: 'Blue', weight: 1})
-
-    // Umieszczam wielokąt na mapie
-    polygon.addTo(map);
-
-    // Dodaję warstwę do mapy
-    map.addLayer(layer);
+                    var map = L.map( 'map', {
+                        center: [ 51.5, -0.1],
+                        zoom: 12
+                    });
 
 
+                    L.tileLayer( 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                        subdomains: ['a','b','c']
+                    }).addTo( map );
+
+                    var query_addr = city;
+
+
+                    const provider = new window.GeoSearch.OpenStreetMapProvider()
+
+                    var query_promise = provider.search({ query: query_addr});
+
+                    query_promise.then( value => {
+                        for(i=0;i < value.length; i++){
+
+                            var x_coor = value[i].x;
+                            var y_coor = value[i].y;
+                            var label = value[i].label;
+
+                            var marker = L.marker([y_coor,x_coor]).addTo(map)
+
+                            marker.bindPopup("<b>Found city with this name</b><br>"+label+"<br>Air pollution level: "+ air).openPopup();
+                        };
+                    }, reason => {
+                        console.log(reason);
+                    } );
+
+                }
+            });
+        }
+        function domUpdateDelayExperiment() {
+            getData();
+        }
+
+        domUpdateDelayExperiment()
+
+
+    });
 </script>
+<div id = "map" style = "width: 600px; height: 400px"></div>
 </body>
-
 </html>

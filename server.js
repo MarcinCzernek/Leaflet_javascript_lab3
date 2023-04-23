@@ -4,7 +4,7 @@ const path = require('path');
 
 const server = http.createServer((req, res) => {
   if (req.url === '/') {
-    fs.readFile('zad3_openAQ/LabOpenAQ.html', (err, data) => {
+    fs.readFile('index.html', (err, data) => {
       if (err) {
         res.writeHead(404);
         res.end('404 Not Found');
